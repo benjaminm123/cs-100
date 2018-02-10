@@ -1,12 +1,17 @@
-#include "rReceiver.h"
+#include "CommandReceiver.h"
 
-int CommandReceiver::Terminate()
+void CommandReceiver::Terminate() const
 {
-   return 0;
+   exit(EXIT_SUCCESS);
 }
 
-bool CommandReceiver::RunProgram(std::vector<char *> &ArgumentList)
+bool CommandReceiver::RunProgram(const std::vector<char *> &ArgumentList) const
 {
+    if (!strcmp(ArgumentList[0], "exit"))
+    {
+    	Terminate();
+    }
+    
     pid_t pid = fork();
 	
 	if (pid > 0)
@@ -40,7 +45,7 @@ bool CommandReceiver::RunProgram(std::vector<char *> &ArgumentList)
 	return true;
 }
 
-bool CommandReceiver::ChangeDirectory()
+bool CommandReceiver::ChangeDirectory() const
 {
 	bool ret = false;
 	

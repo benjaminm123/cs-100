@@ -1,12 +1,12 @@
 #pragma once
 
 #include "CommandBase.h"
-#include "Includes"
+#include "Includes.h"
 
 class ConcreteConnector : public CommandBase
 {
 public:
-    Connector()
+    ConcreteConnector()
     {
         
     }
@@ -17,31 +17,31 @@ public:
 class Semicolon : public ConcreteConnector
 {
 public:
-    Semicolon(Base lhs, Base rhs) : lhs(lhs), rhs(rhs)
+    Semicolon(CommandBase *lhs, CommandBase *rhs) : lhs(lhs), rhs(rhs)
     {
 
     }
     
-    bool Execute()
+    bool Execute() 
     {
         lhs->Execute();
         return rhs->Execute();
     }
 
 private:
-    Base lhs;
-    Base rhs;
+    CommandBase *lhs;
+    CommandBase *rhs;
 };
 
 class And : public ConcreteConnector
 {
 public:
-    And(Base lhs, Base rhs) : lhs(lhs), rhs(rhs)
+    And(CommandBase *lhs, CommandBase *rhs) : lhs(lhs), rhs(rhs)
     {
 
     }
 
-    bool Execute()
+    bool Execute() 
     {
         if (!lhs->Execute())
         {
@@ -52,19 +52,19 @@ public:
     }
 
 private:
-    Base lhs;
-    Base rhs;
+    CommandBase *lhs;
+    CommandBase *rhs;
 };
 
 class Or : public ConcreteConnector
 {
 public:
-    Or(Base lhs, Base rhs) : lhs(lhs), rhs(rhs)
+    Or(CommandBase *lhs, CommandBase *rhs) : lhs(lhs), rhs(rhs)
     {
 
     }
     
-    bool Execute()
+    bool Execute() 
     {
         if (!lhs->Execute())
         {
@@ -75,6 +75,6 @@ public:
     }
 
 private:
-    Base lhs;
-    Base rhs;
+    CommandBase *lhs;
+    CommandBase *rhs;
 };

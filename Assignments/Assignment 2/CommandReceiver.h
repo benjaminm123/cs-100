@@ -5,7 +5,7 @@
 class CommandReceiver
 {
 public:
-    const int Terminate() const;
-    bool RunProgram(std::vector<char *> &ArgumentList) const;
+    void Terminate() const;
+    bool RunProgram(const std::vector<char *> &ArgumentList) const;
     bool ChangeDirectory() const;
 };

@@ -2,19 +2,19 @@
 
 #include "CommandBase.h"
 #include "CommandReceiver.h"
-#include "Includes.h"
 
 class ConcreteSingleCommand : public CommandBase
 {
 public:
-    ConcreteSingleCommand(Receiver Executor) : Executor(Executor)
+    ConcreteSingleCommand(CommandReceiver *Receiver) : Receiver(Receiver)
     {
         
     }
     
-    bool Execute() const
+    bool Execute()
     {
-        return Executor->RunProgram(ArgumentList);
+        ArgumentList.push_back(nullptr);
+        return Receiver->RunProgram(ArgumentList);
     }
     
     void Push(const std::string &Argument)
@@ -23,6 +23,6 @@ public:
     }
     
 private:
-    Receiver Executor;
+    CommandReceiver *Receiver;
     std::vector<char *> ArgumentList;
 };

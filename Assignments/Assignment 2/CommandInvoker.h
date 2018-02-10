@@ -6,16 +6,16 @@
 class CommandInvoker
 {
 public:
-    void SetCommand(Base Command)
+    void SetCommand(CommandBase *Command)
     {
         this->Command = Command;
     }
     
-    bool RunCommand(std::vector<char *> &ArgumentList)
+    bool RunCommand()
     {
-        return Command->Execute(args);
+        return Command->Execute();
     }
     
 private:
-    Base Command;
+    CommandBase *Command;
 };
