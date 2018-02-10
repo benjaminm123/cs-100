@@ -5,18 +5,18 @@ Parser::Parser(std::string &Input) : Input(Input)
     
 }
 
-void Parser::ParseInput(std::vector<std::string> &InputVec, std::queue<std::string> &ConnectorList)
+bool Parser::ParseInput(std::vector<std::string> &InputVec, std::queue<std::string> &ConnectorList)
 {
     //check if input is empty and for invalid input
     if (Input.empty())
     {
-        return;
+        return false;
     }
     
     if (Input[0] == ';' || Input[0] == '&' || Input[0] == '|')
     {
-        std::cout << "Shell: syntax error near unexpected token '" << Input[0] << "'\n"; 
-        return;
+        std::cout << "Shell: syntax error\n"; 
+        return false;
     }
 
     //clear vector and queue
@@ -26,22 +26,29 @@ void Parser::ParseInput(std::vector<std::string> &InputVec, std::queue<std::stri
 	{
 		std::queue<std::string>().swap(ConnectorList);
 	}
+    
     //parse input
-    // BalanceQuotations();
-    // BalanceOperators();
+    BalanceQuotations();
+    SaveInput = Input;
     ParseQuotations();
-    SpaceInput();
     // std::cout << "test" << std::endl;
+	SpaceInput();
+// 	std::cout << "test" << std::endl;
+	ParseConnectors(ConnectorList);
+// 	std::cout << "test" << std::endl;
+    // BalanceOperators();
     SplitInput();
     // std::cout << "test" << std::endl;
-    ParseCommands(ConnectorList);
-    // std::cout << "test" << std::endl;
-    InputVec.swap(InputList);
-    // std::cout << "test" << std::endl;
+    bool ret = CheckSyntax();
+    
+	InputVec.swap(InputList);
+
+    return ret;
 }
 
 void Parser::SpaceInput()
 {
+	auto j = 0U;
 	//adds spaces to connectors
 	for (auto i = 0U; i < Input.size(); ++i)
 	{
@@ -49,18 +56,60 @@ void Parser::SpaceInput()
 		switch (Input[i])
 		{
 		case ';':
-			(Input[i + 1] != ' ') ? Input.insert(i + 1, " ") : Input;
-			(Input[i - 1] != ' ') ? Input.insert(i, " ") : Input;
+			if (!SaveQuotation.empty() && j < SaveQuotation.size())
+			{
+				if (!(i > SaveQuotation[j].first && i < SaveQuotation[j].second))
+				{
+					(Input[i + 1] != ' ') ? Input.insert(i + 1, " ") : Input;
+					(Input[i - 1] != ' ') ? Input.insert(i, " ") : Input;
+					++i;
+					++j;
+				}
+			}
+			else
+			{
+				(Input[i + 1] != ' ') ? Input.insert(i + 1, " ") : Input;
+				(Input[i - 1] != ' ') ? Input.insert(i, " ") : Input;
+				++i;
+			}
 			break;
 
 		case '&':
-			(Input[i - 1] != ' ' && Input[i - 1] != '&') ? Input.insert(i, " ") : Input;
-			(Input[i + 1] != ' ' && Input[i + 1] != '&') ? Input.insert(i + 1, " ") : Input;
+			if (!SaveQuotation.empty() && j < SaveQuotation.size())
+			{
+				if (!(i > SaveQuotation[j].first && i < SaveQuotation[j].second))
+				{
+					(Input[i - 1] != ' ' && Input[i - 1] != '&') ? Input.insert(i, " ") : Input;
+					(Input[i + 1] != ' ' && Input[i + 1] != '&') ? Input.insert(i + 1, " ") : Input;
+					++j;
+					++i;
+				}
+			}
+			else
+			{
+				(Input[i - 1] != ' ' && Input[i - 1] != '&') ? Input.insert(i, " ") : Input;
+				(Input[i + 1] != ' ' && Input[i + 1] != '&') ? Input.insert(i + 1, " ") : Input;
+				++i;
+			}
 			break;
 
 		case '|':
-			(Input[i - 1] != ' ' && Input[i - 1] != '|') ? Input.insert(i, " ") : Input;
-			(Input[i + 1] != ' ' && Input[i + 1] != '|') ? Input.insert(i + 1, " ") : Input;
+			if (!SaveQuotation.empty() && j < SaveQuotation.size())
+			{
+				if (!(i > SaveQuotation[j].first && i < SaveQuotation[j].second))
+				{
+					(Input[i - 1] != ' ' && Input[i - 1] != '|') ? Input.insert(i, " ") : Input;
+					(Input[i + 1] != ' ' && Input[i + 1] != '|') ? Input.insert(i + 1, " ") : Input;
+					++i;
+					++j;
+				}
+			}
+			else
+			{
+				(Input[i - 1] != ' ' && Input[i - 1] != '|') ? Input.insert(i, " ") : Input;
+				(Input[i + 1] != ' ' && Input[i + 1] != '|') ? Input.insert(i + 1, " ") : Input;
+				++i;
+			}
 			break;
 
 		default:
@@ -69,32 +118,58 @@ void Parser::SpaceInput()
 	}
 }
 
-void Parser::ParseCommands(std::queue<std::string> &ConnectorList)
+void Parser::ParseConnectors(std::queue<std::string> &ConnectorList)
 {
-    for (auto i = 0U; i < InputList.size(); ++i)
-    {
-        if (InputList[i] == ";" || InputList[i] == "&&" || InputList[i] == "||")
-        {
-            if (SaveIndex.empty())
-            {
-                ConnectorList.emplace(InputList[i]);
-            }
-            else
-            {
-                if (!(SaveIndex[i].first[0] == '"' && SaveIndex[i].second == i))
-                {
-                    ConnectorList.emplace(InputList[i]);
-                }
-            }
-        }
-    }
+	char temp = '\0';
+	int QuotationCounter = 0;
+
+	for (auto i = 0U; i < SaveInput.size(); ++i)
+	{
+		if (QuotationCounter >= 2)
+		{
+			temp = '\0';
+			QuotationCounter = 0;
+		}
+		if (SaveInput[i] == '\"')
+		{
+			temp = SaveInput[i];
+			++QuotationCounter;
+		}
+		if (SaveInput[i] == ';' || SaveInput[i] == '&' && SaveInput[i + 1] == '&' 
+								|| SaveInput[i] == '|' && SaveInput[i + 1] == '|')
+		{
+			if (temp != '\"')
+			{
+				std::string s;
+				switch (SaveInput[i])
+				{
+				case ';':
+					s = ";";
+					ConnectorList.emplace(s);
+					break;
+				
+				case '&':
+					s = "&&";
+					ConnectorList.emplace(s);
+					break;
+				
+				case '|':
+					s = "||";
+					ConnectorList.emplace(s);
+					break;
+				
+				default:
+					break;
+				}
+			}
+		}
+	}
 }
 
 void Parser::SplitInput()
 {
     std::istringstream iss(Input);
     std::string Token;
-    
     //splits input into tokens which get pushed into string a vector
     while (iss >> Token)
     {
@@ -107,46 +182,46 @@ void Parser::ParseQuotations()
     //saves the position of quotation marks that will be erased
     for (auto i = 0U; i < Input.size(); ++i)
     {
-        if (Input[i] == '"')
+        if (Input[i] == '\"' && Input[i - 1] != '\\')
+		{
+            SavePosition.emplace_back(i);
+		}
+    }
+    
+    //save quotation index
+	for (auto i = 0U; i < Input.size(); ++i)
+	{
+		if (Input[i] == '\"')
 		{
 			for (auto j = i + 1; j < Input.size(); ++j)
 			{
-				if (Input[j] == '"')
+				if (Input[j] == '\"')
 				{
-					SavePosition.emplace_back(std::make_pair(i, j));
+					SaveQuotation.emplace_back(i, j);
 					i = j + 1;
 					break;
 				}
 			}
 		}
-    }
-    
-    std::istringstream iss(Input);
-    std::string temp;
-    auto i = 0U;
-    
-    //save index of quotation mark to determine whether or not connector is within quotation marks
-    while (iss >> temp)
-    {
-        for (auto j = 0U; j < temp.size(); ++j)
-        {
-            if (temp[j] == '"')
-            {
-                SaveIndex.emplace_back(std::make_pair(temp, i));
-            }
-        }
-        
-        ++i;
-    }
+	}
     
     //erase quotation marks
-    for (auto j = 0U; j < Input.size(); ++j)
-    {
-        if (Input[j] == '"')
-        {
-            Input.erase(j, 1);
-        }
-    }
+	for (auto i = 0U; i < SavePosition.size(); ++i)
+	{
+		Input.erase(SavePosition[i], 1);
+		if (i < SavePosition.size() - 1)
+		{
+			SavePosition[i + 1] = SavePosition[i + 1] - (1 + i);
+		}
+	}
+
+	for (auto i = 0U; i < Input.size(); ++i)
+	{
+		if (Input[i] == '\\')
+		{
+			Input.erase(i, 1);
+		}
+	}
 }
 
 void Parser::BalanceQuotations()
@@ -154,6 +229,7 @@ void Parser::BalanceQuotations()
     //balances unclosed '"', '&&', and '||'
     int QuoteCount = 0;
     
+    //count number of quotes in input
     for (auto i = 0U; i < Input.size(); ++i)
     {
         if (Input[i] == '"' && Input[i - 1] != '\\')
@@ -162,10 +238,12 @@ void Parser::BalanceQuotations()
         }
     }
     
+    //check for even quote count
     while ((QuoteCount % 2))
     {
         std::cout << "> ";
         
+        //if quote count is not even ask for input
         std::string temp;
         getline(std::cin, temp);
         
@@ -177,6 +255,7 @@ void Parser::BalanceQuotations()
             }
         }
         
+        //add newline after input
         if (temp == "\"")
         {
             Input += temp;
@@ -192,5 +271,27 @@ void Parser::BalanceQuotations()
 
 void Parser::BalanceOperators()
 {
-    
+
+}
+
+bool Parser::CheckSyntax()
+{
+	for (auto i = 0U; i < InputList.size(); ++i)
+	{
+		if (InputList[i] == ";" || InputList[i] == "||" || InputList[i] == "&&")
+		{
+			if (InputList[i + 1] == ";" || InputList[i + 1] == "||" || InputList[i + 1] == "&&")
+			{
+				std::cout << "Shell: syntax error\n"; 
+				return false;
+			}
+			else if (InputList[i - 1] == ";" || InputList[i - 1] == "||" || InputList[i - 1] == "&&")
+			{
+				std::cout << "Shell: syntax error\n"; 
+				return false;
+			}
+		}
+	}
+	
+	return true;
 }

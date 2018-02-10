@@ -16,12 +16,13 @@ public:
     void CreateCommands();
     
 private:
-    CommandReceiver* Receiver;
-    std::queue<CommandBase *> SingleCommandList;
-    std::deque<CommandBase *> CommandTree;
+    std::shared_ptr<CommandReceiver> Receiver;
+    std::queue<std::shared_ptr<CommandBase>> SingleCommandList;
+    std::deque<std::shared_ptr<CommandBase>> CommandTree;
     std::queue<std::string> ConnectorList;
-    CommandInvoker *Invoker;
-    ConcreteSingleCommand *Command;
-    ConcreteConnector *Connector;
+    std::shared_ptr<CommandInvoker> Invoker;
+    std::shared_ptr<ConcreteSingleCommand> Command;
+    std::shared_ptr<ConcreteConnector> Connector;
     std::vector<std::string> InputVec;
+    int NumCommands;
 };

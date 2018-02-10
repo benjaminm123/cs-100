@@ -6,7 +6,7 @@
 class CommandInvoker
 {
 public:
-    void SetCommand(CommandBase *Command)
+    void SetCommand(std::shared_ptr<CommandBase> Command)
     {
         this->Command = Command;
     }
@@ -17,5 +17,5 @@ public:
     }
     
 private:
-    CommandBase *Command;
+    std::shared_ptr<CommandBase> Command;
 };

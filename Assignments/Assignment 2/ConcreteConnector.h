@@ -17,7 +17,7 @@ public:
 class Semicolon : public ConcreteConnector
 {
 public:
-    Semicolon(CommandBase *lhs, CommandBase *rhs) : lhs(lhs), rhs(rhs)
+    Semicolon(std::shared_ptr<CommandBase> lhs, std::shared_ptr<CommandBase> rhs) : lhs(lhs), rhs(rhs)
     {
 
     }
@@ -29,14 +29,14 @@ public:
     }
 
 private:
-    CommandBase *lhs;
-    CommandBase *rhs;
+    std::shared_ptr<CommandBase> lhs;
+    std::shared_ptr<CommandBase> rhs;
 };
 
 class And : public ConcreteConnector
 {
 public:
-    And(CommandBase *lhs, CommandBase *rhs) : lhs(lhs), rhs(rhs)
+    And(std::shared_ptr<CommandBase> lhs, std::shared_ptr<CommandBase> rhs) : lhs(lhs), rhs(rhs)
     {
 
     }
@@ -52,14 +52,14 @@ public:
     }
 
 private:
-    CommandBase *lhs;
-    CommandBase *rhs;
+    std::shared_ptr<CommandBase> lhs;
+    std::shared_ptr<CommandBase> rhs;
 };
 
 class Or : public ConcreteConnector
 {
 public:
-    Or(CommandBase *lhs, CommandBase *rhs) : lhs(lhs), rhs(rhs)
+    Or(std::shared_ptr<CommandBase> lhs, std::shared_ptr<CommandBase> rhs) : lhs(lhs), rhs(rhs)
     {
 
     }
@@ -75,6 +75,6 @@ public:
     }
 
 private:
-    CommandBase *lhs;
-    CommandBase *rhs;
+    std::shared_ptr<CommandBase> lhs;
+    std::shared_ptr<CommandBase> rhs;
 };
