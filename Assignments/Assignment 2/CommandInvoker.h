@@ -12,7 +12,7 @@ public:
         this->Command = Command;
     }
     
-    bool RunCommand()
+    bool RunCommand() const
     {
         return Command->Execute();
     }

@@ -86,7 +86,7 @@ public:
 
     }
     
-    bool Execute() 
+    bool Execute()
     {
         if (!lhs->Execute())
         {

@@ -3,6 +3,8 @@
 #include "CommandBase.h"
 #include "CommandReceiver.h"
 
+#include <memory>
+
 class ConcreteSingleCommand : public CommandBase
 {
 public:

@@ -15,7 +15,7 @@ public:
     
     }
     
-    bool Execute()
+    bool Execute() 
     {
         Receiver->Terminate();
         

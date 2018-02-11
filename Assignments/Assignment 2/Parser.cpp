@@ -46,8 +46,12 @@ bool Parser::ParseInput(std::vector<std::string> &InputVec, std::queue<std::stri
 	SpaceInput();
 	ParseConnectors(ConnectorList);
 	SplitInput();
-	bool Ret = CheckSyntax();
-	BalanceOperators(ConnectorList);
+	if (!CheckSyntax())
+	{
+		return false;
+	}
+	bool Ret = true;
+	BalanceOperators(ConnectorList, Ret);
 	InputVec.swap(InputList);
 
 	return Ret;
@@ -85,16 +89,22 @@ void Parser::SpaceInput()
 			{
 				if (!(i > SaveQuotation[j].first && i < SaveQuotation[j].second))
 				{
+					if (i > 0)
+					{
+						(Input[i - 1] != ' ') ? Input.insert(i, " ") : Input;
+					}
 					(Input[i + 1] != ' ') ? Input.insert(i + 1, " ") : Input;
-					(Input[i - 1] != ' ') ? Input.insert(i, " ") : Input;
 					++i;
 					++j;
 				}
 			}
 			else
 			{
+				if (i > 0)
+				{
+					(Input[i - 1] != ' ') ? Input.insert(i, " ") : Input;
+				}
 				(Input[i + 1] != ' ') ? Input.insert(i + 1, " ") : Input;
-				(Input[i - 1] != ' ') ? Input.insert(i, " ") : Input;
 				++i;
 			}
 			break;
@@ -104,7 +114,10 @@ void Parser::SpaceInput()
 			{
 				if (!(i > SaveQuotation[j].first && i < SaveQuotation[j].second))
 				{
-					(Input[i - 1] != ' ' && Input[i - 1] != '&') ? Input.insert(i, " ") : Input;
+					if (i > 0)
+					{
+						(Input[i - 1] != ' ' && Input[i - 1] != '&') ? Input.insert(i, " ") : Input;
+					}
 					(Input[i + 1] != ' ' && Input[i + 1] != '&') ? Input.insert(i + 1, " ") : Input;
 					++j;
 					++i;
@@ -112,7 +125,10 @@ void Parser::SpaceInput()
 			}
 			else
 			{
-				(Input[i - 1] != ' ' && Input[i - 1] != '&') ? Input.insert(i, " ") : Input;
+				if (i > 0)
+				{
+					(Input[i - 1] != ' ' && Input[i - 1] != '&') ? Input.insert(i, " ") : Input;
+				}
 				(Input[i + 1] != ' ' && Input[i + 1] != '&') ? Input.insert(i + 1, " ") : Input;
 				++i;
 			}
@@ -123,7 +139,10 @@ void Parser::SpaceInput()
 			{
 				if (!(i > SaveQuotation[j].first && i < SaveQuotation[j].second))
 				{
-					(Input[i - 1] != ' ' && Input[i - 1] != '|') ? Input.insert(i, " ") : Input;
+					if (i > 0)
+					{
+						(Input[i - 1] != ' ' && Input[i - 1] != '|') ? Input.insert(i, " ") : Input;
+					}
 					(Input[i + 1] != ' ' && Input[i + 1] != '|') ? Input.insert(i + 1, " ") : Input;
 					++i;
 					++j;
@@ -131,7 +150,10 @@ void Parser::SpaceInput()
 			}
 			else
 			{
-				(Input[i - 1] != ' ' && Input[i - 1] != '|') ? Input.insert(i, " ") : Input;
+				if (i > 0)
+				{
+					(Input[i - 1] != ' ' && Input[i - 1] != '|') ? Input.insert(i, " ") : Input;
+				}
 				(Input[i + 1] != ' ' && Input[i + 1] != '|') ? Input.insert(i + 1, " ") : Input;
 				++i;
 			}
@@ -349,7 +371,7 @@ void Parser::BalanceQuotations()
 	}
 }
 
-void Parser::BalanceOperators(std::queue<std::string> &ConnectorList)
+void Parser::BalanceOperators(std::queue<std::string> &ConnectorList, bool &Ret)
 {
 	std::string Temp;
 	bool HasNext = false;
@@ -386,13 +408,17 @@ void Parser::BalanceOperators(std::queue<std::string> &ConnectorList)
 			ParseComments();
 			BalanceQuotations();
 			SpaceInput();
-			CheckSyntax();
 			ParseConnectors(ConnectorList);
 			std::istringstream iss(Input);
 			std::string Token;
 			while (iss >> Token)
 			{
 				InputList.emplace_back(Token);
+			}
+			if (!CheckSyntax())
+			{
+				Ret = false;
+				return;
 			}
 		}
 	}
@@ -406,7 +432,7 @@ bool Parser::CheckSyntax()
 		{
 			if (InputList[i + 1] == ";" || InputList[i + 1] == "||" || InputList[i + 1] == "&&")
 			{
-				std::cout << "Shell: syntax error near unexpected token `" << InputList[i] << "'\n";
+				std::cout << "Shell: syntax error near unexpected token `" << InputList[i + 1] << "'\n";
 				return false;
 			}
 			else if (InputList[i - 1] == ";" || InputList[i - 1] == "||" || InputList[i - 1] == "&&")

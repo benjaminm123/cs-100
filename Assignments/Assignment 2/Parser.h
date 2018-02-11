@@ -19,7 +19,7 @@ public:
     void SplitInput();
     bool ParseQuotations(std::string &TempInput, std::string &Input);
     void BalanceQuotations();
-    void BalanceOperators(std::queue<std::string> &ConnectorList);
+    void BalanceOperators(std::queue<std::string> &ConnectorList, bool &Ret);
     bool CheckSyntax();
     void Clear();
     void ParseComments();
