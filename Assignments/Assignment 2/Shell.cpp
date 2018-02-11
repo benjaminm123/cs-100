@@ -1,8 +1,8 @@
 #include "Shell.h"
 
-Shell::Shell() : SingleCommandList(), ConnectorList()
+Shell::Shell()
 {
-    
+
 }
 
 void Shell::Run()
@@ -12,6 +12,7 @@ void Shell::Run()
     Receiver = std::make_shared<CommandReceiver>();
     Invoker = std::make_shared<CommandInvoker>();
     
+    
     while (Status)
     {
         PrintPrompt(InfoAvailable);
@@ -20,7 +21,6 @@ void Shell::Run()
         Parser Parser(Input);
         if (Parser.ParseInput(InputVec, ConnectorList))
         {
-            // std::cout << "test" << std::endl;
             Status = ExecuteCommands();
         }
     }
@@ -60,13 +60,18 @@ void Shell::CreateCommands()
 {
 	Command = std::make_shared<ConcreteSingleCommand>(Receiver);
 	bool HasNext = true;
+	std::string Input;
 
 	for (auto i = 0U; i < InputVec.size(); ++i)
 	{
-		if (InputVec[i] == ";" || InputVec[i] == "&&" || InputVec[i] == "||")
+		Parser parse;
+		bool HasConnector = parse.ParseQuotations(Input, InputVec[i]);
+		
+		if ((Input == ";" || Input == "&&" || Input == "||") && !HasConnector)
 		{
-			SingleCommandList.emplace(Command);
-			if ((i + 1) < InputVec.size())
+	        SingleCommandList.emplace(Command); 
+	        
+	        if ((i + 1) < InputVec.size())
 			{
 				Command = std::make_shared<ConcreteSingleCommand>(Receiver);
 			}
@@ -77,7 +82,7 @@ void Shell::CreateCommands()
 		}
 		else
 		{
-			Command->Push(InputVec[i]);
+            Command->Push(Input);
 		}
 	}
     
@@ -124,20 +129,40 @@ void Shell::BuildTree()
     {
         if (ConnectorList.front() == ";")
         {
-            //get lhs and rhs to push into command tree
-            //save first command as lhs to pass into a "semicolon" object
-            std::shared_ptr<CommandBase> lhs = SingleCommandList.front();
-            SingleCommandList.pop();
-            //save second command as rhs to pass into a "semicolon" object
-            std::shared_ptr<CommandBase> rhs = SingleCommandList.front();
-            SingleCommandList.pop();
-            
-            //create "semicolon" object and push into tree
-            Connector = std::make_shared<Semicolon>(lhs, rhs);
-            CommandTree.emplace_front(Connector);
-            
-            //pop connector from queue
-            ConnectorList.pop();
+			if (CommandTree.empty())
+			{
+				//get lhs and rhs to push into command tree
+				//save first command as lhs to pass into a "semicolon" object
+				std::shared_ptr<CommandBase> lhs = SingleCommandList.front();
+				SingleCommandList.pop();
+				//save second command as rhs to pass into a "semicolon" object
+				std::shared_ptr<CommandBase> rhs = SingleCommandList.front();
+				SingleCommandList.pop();
+
+				//create "semicolon" object and push into tree
+				Connector = std::make_shared<Semicolon>(lhs, rhs);
+				CommandTree.emplace_front(Connector);
+
+				//pop connector from queue
+				ConnectorList.pop();
+			}
+			else
+			{
+				//get lhs and rhs to push into command tree
+				//save first command as lhs to pass into a "semicolon" object
+				std::shared_ptr<CommandBase> lhs = CommandTree.back();
+				CommandTree.pop_back();
+				//save second command as rhs to pass into a "semicolon" object
+				std::shared_ptr<CommandBase> rhs = SingleCommandList.front();
+				SingleCommandList.pop();
+
+				//create "semicolon" object and push into tree
+				Connector = std::make_shared<Semicolon>(lhs, rhs);
+				CommandTree.emplace_front(Connector);
+
+				//pop connector from queue
+				ConnectorList.pop();
+			}
         }
         //checks if the command is joined by an "and" operator
         else if (ConnectorList.front() == "&&")

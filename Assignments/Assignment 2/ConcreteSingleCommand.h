@@ -6,23 +6,27 @@
 class ConcreteSingleCommand : public CommandBase
 {
 public:
-    ConcreteSingleCommand(CommandReceiver *Receiver) : Receiver(Receiver)
+    ConcreteSingleCommand(std::shared_ptr<CommandReceiver> Receiver) : Receiver(Receiver)
     {
-        
+
     }
     
     bool Execute()
     {
-        ArgumentList.push_back(nullptr);
         return Receiver->RunProgram(ArgumentList);
     }
     
-    void Push(const std::string &Argument)
+    void Push(std::string &Argument)
     {
-        ArgumentList.push_back(const_cast<char *>(Argument.c_str()));
+		ArgumentList.emplace_back(Argument);
+    }
+    
+    std::string GetCommand(const int i) const
+    {
+        return ArgumentList[i];
     }
     
 private:
-    CommandReceiver *Receiver;
-    std::vector<char *> ArgumentList;
+    std::shared_ptr<CommandReceiver> Receiver;
+    std::vector<std::string> ArgumentList;
 };

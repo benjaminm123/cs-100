@@ -1,11 +1,18 @@
 #pragma once
 
-#include "Includes.h"
+#include <vector>
+#include <string>
+#include <unistd.h>
+#include <cstdio>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <cstdlib>
+#include <iostream>
 
 class CommandReceiver
 {
 public:
     void Terminate() const;
-    bool RunProgram(const std::vector<char *> &ArgumentList) const;
+    bool RunProgram(std::vector<std::string> &ArgumentList) const;
     bool ChangeDirectory() const;
 };

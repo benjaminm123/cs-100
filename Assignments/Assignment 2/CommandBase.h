@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Includes.h"
+#include <string>
 
 class CommandBase
 {
@@ -11,4 +11,6 @@ public:
     }
     
     virtual bool Execute() = 0;
+    
+    virtual std::string GetCommand(const int i) const = 0;
 };

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "CommandBase.h"
-#include "Includes.h"
+
+#include <memory>
 
 class ConcreteConnector : public CommandBase
 {
@@ -12,6 +13,7 @@ public:
     }
     
     virtual bool Execute() = 0;
+    virtual std::string GetCommand(const int i) const = 0;
 };
 
 class Semicolon : public ConcreteConnector
@@ -28,6 +30,16 @@ public:
         return rhs->Execute();
     }
 
+    std::string GetCommand(const int i) const
+    {
+        if (!i)
+        {
+            return lhs->GetCommand(0);
+        }
+        
+        return rhs->GetCommand(0);
+    }
+    
 private:
     std::shared_ptr<CommandBase> lhs;
     std::shared_ptr<CommandBase> rhs;
@@ -49,6 +61,16 @@ public:
         }
         
         return rhs->Execute();
+    }
+    
+    std::string GetCommand(const int i) const
+    {
+        if (!i)
+        {
+            return lhs->GetCommand(0);
+        }
+        
+        return rhs->GetCommand(0);
     }
 
 private:
@@ -72,6 +94,16 @@ public:
         }
         
         return false;
+    }
+    
+    std::string GetCommand(const int i) const
+    {
+        if (!i)
+        {
+            return lhs->GetCommand(0);
+        }
+        
+        return rhs->GetCommand(0);
     }
 
 private:

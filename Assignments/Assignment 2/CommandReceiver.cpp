@@ -5,12 +5,21 @@ void CommandReceiver::Terminate() const
    exit(EXIT_SUCCESS);
 }
 
-bool CommandReceiver::RunProgram(const std::vector<char *> &ArgumentList) const
+bool CommandReceiver::RunProgram(std::vector<std::string> &ArgumentList) const
 {
-    if (!strcmp(ArgumentList[0], "exit"))
-    {
-    	Terminate();
-    }
+	if (ArgumentList[0] == "exit")
+	{
+		Terminate();
+	}
+    
+	std::vector<char *> Args;
+	
+	for (auto i = 0U; i < ArgumentList.size(); ++i)
+	{
+		Args.emplace_back(const_cast<char *>(ArgumentList[i].c_str()));
+	}
+	
+	Args.emplace_back(nullptr);
     
     pid_t pid = fork();
 	
@@ -30,9 +39,9 @@ bool CommandReceiver::RunProgram(const std::vector<char *> &ArgumentList) const
 	}
 	else if (pid == 0)
 	{
-		if (execvp(ArgumentList[0], ArgumentList.data()) == -1)
+		if (execvp(Args[0], Args.data()) == -1)
 		{
-			std::cout << "Shell: " << ArgumentList[0] << ": " << "command not found" << std::endl;
+			std::cout << "Shell: " << Args[0] << ": " << "command not found" << std::endl;
 			exit(EXIT_FAILURE);
 		}
 	}

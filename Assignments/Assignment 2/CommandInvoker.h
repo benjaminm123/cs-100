@@ -1,7 +1,8 @@
 #pragma once
 
-#include "CommandInvoker.h"
-#include "Includes.h"
+#include "CommandBase.h"
+
+#include <memory>
 
 class CommandInvoker
 {
